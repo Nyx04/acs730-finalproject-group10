@@ -1,4 +1,4 @@
-bucket         = "group10-acs730-dev-tfstate"     
+bucket         = "group10-acs730-dev-tfstate1"     
 key            = "two-tier-app/dev/terraform.tfstate"
 region         = "us-east-1"
 encrypt        = true

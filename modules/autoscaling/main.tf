@@ -1,66 +1,49 @@
-resource "aws_autoscaling_group" "asg" {
-  name                = "${var.project}-${var.environment}-asg"
-  max_size            = var.max_size
-  min_size            = var.min_size
-  desired_capacity    = var.desired_capacity
-  vpc_zone_identifier = var.public_subnets
-  wait_for_capacity_timeout = "15m"
+# --- 1. Launch Template ---
+resource "aws_launch_template" "this" {
+  name_prefix   = "${var.project}-${var.environment}-LT"
+  image_id      = var.ami_id
+  instance_type = var.instance_type
+  key_name      = var.key_pair_name
+
+  network_interfaces {
+    associate_public_ip_address = false # Instances in private subnets
+    security_groups             = [var.app_sg_id]
+  }
+
+  iam_instance_profile {
+    arn = var.iam_instance_profile_arn # Must be created in IAM module
+  }
+
+  # Example User Data to install and run a simple web server
+  user_data = base64encode(templatefile("${path.root}/../../scripts/upload_image.sh", {
+    images_bucket = var.images_bucket
+    page_title    = "${var.project} - ${var.environment}"
+    team_names    = var.team_names
+    environment   = var.environment
+  }))
+  
+}
+  resource "aws_autoscaling_group" "this" {
+  desired_capacity     = 2
+  max_size             = 2
+  min_size             = 2
+  vpc_zone_identifier  = var.private_subnet_ids
   launch_template {
-    id      = var.launch_template_id
+    id      = aws_launch_template.this.id
     version = "$Latest"
   }
 
-  tag {
-    key                 = "Name"
-    value               = "${var.project}-${var.environment}-ASG"
-    propagate_at_launch = true
-  }
+  target_group_arns = [var.target_group_arn]  # <-- use the variable
 
-  health_check_type         = "EC2"
+  health_check_type         = "ELB"  # Use ALB health checks instead of EC2
   health_check_grace_period = 300
+  # tags = [
+  #   {
+  #     key                 = "Name"
+  #     value               = "${var.project}-${var.environment}-instance"
+  #     propagate_at_launch = true
+  #   }
+  # ]
 }
 
-
-resource "aws_autoscaling_policy" "scale_out" {
-  name                    = "${var.project}-${var.environment}-scaleOut"
-  autoscaling_group_name   = aws_autoscaling_group.asg.name
-  adjustment_type          = "ChangeInCapacity"
-  scaling_adjustment       = 1
-  cooldown                 = 300
-}
-
-resource "aws_autoscaling_policy" "scale_in" {
-  name                    = "${var.project}-${var.environment}-scaleIn"
-  autoscaling_group_name   = aws_autoscaling_group.asg.name
-  adjustment_type          = "ChangeInCapacity"
-  scaling_adjustment       = -1
-  cooldown                 = 300
-}
-
-resource "aws_cloudwatch_metric_alarm" "cpu_high" {
-  alarm_name          = "${var.project}-${var.environment}-cpu-high"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 2
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
-  period              = 60
-  statistic           = "Average"
-  threshold           = 10.0
-  alarm_actions       = [aws_autoscaling_policy.scale_out.arn]
-}
-
-resource "aws_cloudwatch_metric_alarm" "cpu_low" {
-  alarm_name          = "${var.project}-${var.environment}-cpu-low"
-  comparison_operator = "LessThanThreshold"
-  evaluation_periods  = 2
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
-  period              = 60
-  statistic           = "Average"
-  threshold           = 5.0
-  alarm_actions       = [aws_autoscaling_policy.scale_in.arn]
-}
-
-output "asg_name" {
-  value = aws_autoscaling_group.asg.name
-}
+# Note: You would typically add scaling policies here (e.g., CPU utilization)
