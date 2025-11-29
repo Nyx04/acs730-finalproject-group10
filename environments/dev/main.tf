@@ -40,8 +40,8 @@ module "iam" {
   source        = "../../modules/iam"
   project       = var.project
   environment   = var.environment
-  images_bucket = var.images_bucket
-  common_tags   = local.common_tags
+  #images_bucket = var.images_bucket
+  #common_tags   = local.common_tags
 }
 
 module "launch" {
