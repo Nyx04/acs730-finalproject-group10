@@ -1,5 +1,5 @@
 region = "us-east-1"
-environment = "dev"
+environment = "prod"
 vpc_cidr = "10.250.0.0/16"
 azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
 ami_id = "ami-0fa3fe0fa7920f68e" # example Amazon Linux 2 (replace for your region)
