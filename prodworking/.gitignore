@@ -1,6 +1,7 @@
 *.tfstate
 *.tfstate.*
 .terraform/
+terraform.tfvars
 *.pem
 .env
 .vscode/
