@@ -35,15 +35,6 @@ terraform init
 terraform plan -var-file=terraform.tfvars
 terraform apply -var-file=terraform.tfvars
 
-run these command befor plan
-# Delete the ALB
-aws elbv2 delete-load-balancer --load-balancer-arn $(aws elbv2 describe-load-balancers --names Group10-dev-alb --query 'LoadBalancers[0].LoadBalancerArn' --output text)
-
-# Wait a moment for the ALB to be deleted, then delete the target group
-aws elbv2 delete-target-group --target-group-arn $(aws elbv2 describe-target-groups --names Group10-dev-tg --query 'TargetGroups[0].TargetGroupArn' --output text)
+run these command befor apply
 \rm -rf ~/.aws/credentials
 aws sts get-caller-identity
-
-
-***we should add target groups to become healthy in AWS console in orther for the website to work and show the image
-
