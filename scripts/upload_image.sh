@@ -1,8 +1,10 @@
 #!/bin/bash
-
 # Update system and install Apache + AWS CLI
 yum update -y
 yum install -y httpd awscli
+
+# CHANGE APACHE TO LISTEN ON PORT 8080
+sed -i 's/Listen 80/Listen 8080/' /etc/httpd/conf/httpd.conf
 
 systemctl enable httpd
 systemctl start httpd
@@ -16,13 +18,9 @@ cat > /var/www/html/index.html <<EOT
 <head><title>${page_title}</title></head>
 <body>
 <h1>${page_title}</h1>
-
 <p>Team: ${team_names}</p>
-
 <img src="site-image.jpg" alt="S3 Image" width="400"/>
-
 <p>Environment: ${environment}</p>
-
 </body>
 </html>
 EOT

@@ -15,23 +15,23 @@ This repo implements the two-tier static web application required for ACS730 fin
 
 ## Important: Manual steps before running Terraform
 1. Create S3 buckets for Terraform state for each environment (unique globally). Example:
-- `group10-acs730-dev-tfstate`
-- `group10-acs730-staging-tfstate`
-- `group10-acs730-prod-tfstate`
+- `group10-acs730-dev-tfstate1`
+- `group10-acs730-staging-tfstate1`
+- `group10-acs730-prod-tfstate1`
 2. Create a single DynamoDB table for remote state locking (or one per environment):
 - Table name: `group10-acs730-terraform-locks` (string PK `LockID`)
 3. Create 3 private S3 buckets to host the website image (per assignment requirement) and upload `site-image.jpg` to each one
 one S3 bucket for each env (dev, prod, staging)
-- `group10-acs730-dev-images`
-- `group10-acs730-staging-images`
-- `group10-acs730-prod-images`
+- `group10-acs730-dev-images1`
+- `group10-acs730-staging-images1`
+- `group10-acs730-prod-images1`
 
 
 ## Quick deploy (example for dev)
 1. Edit `environments/dev/terraform.tfvars` and set values (images_bucket, ami_id, etc.)
 2. Initialize Terraform (from `environments/dev`):
 ```bash
-terraform init -backend-config=../../backend_configs/backend-dev.hcl
+terraform init
 terraform plan -var-file=terraform.tfvars
 terraform apply -var-file=terraform.tfvars
 
